@@ -1,15 +1,13 @@
 import os
-import trimesh
-import distinctipy
 import numpy as np
 from PIL import Image
 from tqdm import tqdm
 from plyfile import PlyData
 from trimesh import Trimesh
 from functools import partial
-from tqdm.contrib.concurrent import thread_map, process_map
+from tqdm.contrib.concurrent import thread_map
 
-from samscene.utils import load_camera_from_trajectory, read_json, write_json
+from samscene.utils import load_camera_from_trajectory
 
 
 class IDTracker:
@@ -104,6 +102,10 @@ class TriangleTracker:
         mask_face_size = dict(sorted(mask_face_size.items(), key=lambda item: item[1]))
         return mask_face_size
 
+    def set_image_resolution(self, h, w):
+        self.h = h
+        self.w = w
+
     def track(self, level, output_path=None):
         def track_add(tri, tri_id):
             tri.add(tri_id)
@@ -185,10 +187,23 @@ class TriangleTracker:
             self.face_to_object[face_id] = tracker.best_id
 
         if output_path is not None:
-
+            os.makedirs(os.path.abspath(os.path.dirname(output_path)), exist_ok=True)
             np.save(output_path, self.face_to_object)
 
         return self.face_to_object
 
-    def export_mesh(self, output_path):
-        
+    def export_colored_mesh(self, output_path: str, seed: int = 42):
+        np.random.seed(seed)
+        unique_objects = np.unique(self.face_to_object)
+        object_colors = {}
+        for object_id in unique_objects:
+            object_colors[object_id] = (np.random.rand(3) * 255).astype(np.uint8)
+
+        output_mesh = self.mesh.copy()
+        face_colors = np.zeros((self.num_triangles, 3), dtype=int)
+        for face_id in range(self.num_triangles):
+            object_id = self.face_to_object[face_id]
+            face_colors[face_id] = object_colors[object_id]
+        output_mesh.visual.face_colors = face_colors
+        os.makedirs(os.path.abspath(os.path.dirname(output_path)), exist_ok=True)
+        output_mesh.export(output_path)

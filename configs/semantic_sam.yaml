@@ -1,0 +1,14 @@
+# Semantic SAM model type
+model_type: L
+# Path to the checkpoint
+ckpt: ./models/swinl_only_sam_many2many.pth
+# Segmentation level
+level: [1, 2, 3, 4, 5]
+# Device to use
+device: cuda
+# visualize masks as images outputs
+visualize: true
+# input directory
+input_dir: ./outputs/scene_00021_00/rgb
+# output directory
+output_dir: ./outputs/scene_00021_00/semantic_sam

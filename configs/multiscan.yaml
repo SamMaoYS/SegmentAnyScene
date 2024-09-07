@@ -1,0 +1,24 @@
+# Root directory path to dataset
+dataset_dir: ./data/multiscan
+# Scan ID
+scan_id: scene_00021_00
+# Output folder directory
+output: outputs
+# Start index of frame to decode
+start: 0
+# Stop index of frame to decode, if 0, use all frames
+stop: 0
+# Space between frames to decode
+step: 10
+# Input frame width, if 0, use original width
+width: 0
+# Input frame height, if 0, use original height
+height: 0
+# Number of workers
+num_workers: 4
+# Output scale "<width>x<height>", e.g: "256x192"
+scale: 640x480
+# Output crop "left,top,right,bottom", e.g: "100,50,100,50"
+crop:
+# Output tmp directory
+tmp: tmp
