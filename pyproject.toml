@@ -1,0 +1,27 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "samscene"
+version = "0.0.1"
+description = "Segment Anything Model for 3D Scenes"
+requires-python = ">=3.9.0"
+license = { file = "LICENSE" }
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Programming Language :: Python",
+]
+readme = "README.md"
+
+
+dependencies = [
+    "opencv-python-headless>=4.10.0",
+    "tqdm>=4.66.5",
+    "trimesh>=4.4.4",
+    "plyfile",
+    "distinctipy",
+]
+
+[tool.setuptools.packages.find]
+include = ["samscene*"]
