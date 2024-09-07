@@ -1,0 +1,7 @@
+defaults:
+  - multiscan
+
+batch_size: 100
+num_workers: 16
+
+sam_mask: ./outputs/scene_00021_00/semantic_sam

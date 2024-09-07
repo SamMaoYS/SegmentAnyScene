@@ -19,7 +19,7 @@ def main(cfg: DictConfig):
         level=cfg.level,
         device=cfg.device,
     )
-    image_files = glob.glob(os.path.join(cfg.input_dir, "*.png"))
+    image_files = glob(os.path.join(cfg.input_dir, "*.png"))
     # npy format predicted SAM files will be saved to the output directory
     # jpg images will be saved to the output directory if visualize is True
     semantic_sam.generate_masks_batch(

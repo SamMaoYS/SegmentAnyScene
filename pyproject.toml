@@ -16,11 +16,15 @@ readme = "README.md"
 
 
 dependencies = [
-    "opencv-python-headless>=4.10.0",
-    "tqdm>=4.66.5",
-    "trimesh>=4.4.4",
+    "opencv-python-headless",
+    "tqdm",
+    "trimesh",
     "plyfile",
     "distinctipy",
+    "hydra-core",
+    "decord",
+    "natsort",
+    "colorlog",
 ]
 
 [tool.setuptools.packages.find]

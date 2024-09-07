@@ -7,7 +7,7 @@ from trimesh import Trimesh
 from functools import partial
 from tqdm.contrib.concurrent import thread_map
 
-from samscene.utils import load_camera_from_trajectory
+from samscene.utils import log, load_camera_from_trajectory
 
 
 class IDTracker:
@@ -61,21 +61,20 @@ class TriangleTracker:
 
         self.face_to_object = np.zeros(self.num_triangles, dtype=int)
 
-    def _load_sam_masks(self, name, level):
+    def _load_sam_masks(self, name):
         sam_mask = np.full((self.h, self.w), -1, dtype=int)
         instance_id = 0
-        for l in level:
-            seg_path = os.path.join(self.sam_mask_dir + f"_level_{l}", name + ".npy")
-            masks = np.load(seg_path, allow_pickle=True)
-            masks = sorted(masks, key=lambda x: x["area"], reverse=True)
+        seg_path = os.path.join(self.sam_mask_dir, name + ".npy")
+        masks = np.load(seg_path, allow_pickle=True)
+        masks = sorted(masks, key=lambda x: x["area"], reverse=True)
 
-            num_masks = len(masks)
-            for i in range(num_masks):
-                valid_mask_pil = Image.fromarray(masks[i]["segmentation"]).convert("L")
-                valid_mask_pil = valid_mask_pil.resize((self.w, self.h))
-                valid_mask = np.array(valid_mask_pil).astype(bool)
-                sam_mask[valid_mask] = instance_id
-                instance_id += 1
+        num_masks = len(masks)
+        for i in range(num_masks):
+            valid_mask_pil = Image.fromarray(masks[i]["segmentation"]).convert("L")
+            valid_mask_pil = valid_mask_pil.resize((self.w, self.h))
+            valid_mask = np.array(valid_mask_pil).astype(bool)
+            sam_mask[valid_mask] = instance_id
+            instance_id += 1
         return sam_mask
 
     def compute_intance_size(self, cam):
@@ -106,7 +105,7 @@ class TriangleTracker:
         self.h = h
         self.w = w
 
-    def track(self, level, output_path=None):
+    def track(self, output_path=None):
         def track_add(tri, tri_id):
             tri.add(tri_id)
 
@@ -120,7 +119,9 @@ class TriangleTracker:
         global_object_index = 0
         h, w = self.h, self.w
 
+        log.info("Sorting masks by instance size...")
         mask_face_size = self.sort_masks()
+        log.info("Start tracking...")
         camera_indices = list(mask_face_size.keys())
         for ci in tqdm(camera_indices):
             if not isinstance(ci, int):
@@ -129,7 +130,7 @@ class TriangleTracker:
             name = cam.name
 
             # load sam masks
-            sam_mask = self._load_sam_masks(name, level)
+            sam_mask = self._load_sam_masks(name)
 
             # load pix triangle indices
             pix_to_face = np.load(
@@ -192,7 +193,7 @@ class TriangleTracker:
 
         return self.face_to_object
 
-    def export_colored_mesh(self, output_path: str, seed: int = 42):
+    def export_colored_mesh(self, output_path: str, seed: int = 0):
         np.random.seed(seed)
         unique_objects = np.unique(self.face_to_object)
         object_colors = {}
